@@ -3,40 +3,78 @@ import matplotlib.patches as mpatches
 import matplotlib.ticker as mticker
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.patheffects import withStroke
 
-# Project setup
-file = "images/amish_population_2100"
+# =============================================================================
+# PROJECT SETUP
+# =============================================================================
+file   = "images/amish_population_2100"
 author = "@MarinoLinic"
 source = "Source: Young Center for Anabaptist & Pietist Studies, Elizabethtown College"
-title = "Amish Population in the USA"
+title  = "Amish Population in the USA"
 
-# Color scheme
-BG           = "#090c14"
-BG_AX        = "#0c1020"
-COL_HIST     = "#f0c060"
-COL_MARK     = "#f0c060"
-COL_PROJ_A   = "#40d0c0"
-COL_PROJ_B   = "#a060f0"
-COL_FILL_H   = "#f0c060"
-COL_GRID_Y   = "#14203a"
-COL_GRID_X   = "#101828"
-COL_SPINE    = "#1e2a3a"
-COL_TICK     = "#506070"
-COL_TITLE    = "#eee8d0"
-COL_AXIS_LBL = "#506070"
-COL_ANNOT_TXT= "#c8dce8"
-COL_ANNOT_BG = "#0a1422"
-COL_ANNOT_EC = "#304050"
-COL_ANNOT_AR = "#304858"
-COL_SOURCE   = "#344858"
-COL_HANDLE   = "#70a0c0"
-COL_LEG_LBL  = "#a0bcd0"
-COL_LEG_EDGE = "#283848"
+# =============================================================================
+# COLORS
+# =============================================================================
+BG            = "#090c14"
+BG_AX         = "#0c1020"
+COL_HIST      = "#f0c060"
+COL_MARK      = "#f0c060"
+COL_PROJ_A    = "#40d0c0"
+COL_PROJ_B    = "#a060f0"
+COL_FILL_H    = "#f0c060"
+COL_GRID_Y    = "#14203a"
+COL_GRID_X    = "#101828"
+COL_SPINE     = "#1e2a3a"
+COL_TICK      = "#506070"
+COL_TITLE     = "#eee8d0"
+COL_AXIS_LBL  = "#506070"
+COL_ANNOT_TXT = "#c8dce8"
+COL_ANNOT_BG  = "#0a1422"
+COL_ANNOT_EC  = "#304050"
+COL_ANNOT_AR  = "#304858"
+COL_SOURCE    = "#485e72"
+COL_HANDLE_A  = "#40d0c0"   # gradient start — matches proj line cyan
+COL_HANDLE_B  = "#a060f0"   # gradient end   — matches proj line violet
+COL_LEG_LBL   = "#a0bcd0"
+COL_LEG_EDGE  = "#283848"
+COL_GLOW      = "#090c14"   # path effect stroke color for username
 
-# Data
-years = np.arange(2000, 2101, 1)
-base_year = 2025
-base_pop = 411_000
+# =============================================================================
+# TEXT SIZES & STYLES
+# =============================================================================
+FS_TITLE      = 26
+FS_AXIS_LBL   = 15
+FS_TICK       = 14
+FS_LEGEND     = 14
+FS_ANNOT      = 14
+FS_SOURCE     = 11
+FS_HANDLE     = 17
+
+FW_TITLE      = "bold"
+FW_ANNOT      = "bold"
+FW_HANDLE     = "bold"
+
+FF_TITLE      = "serif"
+FS_TITLE_PAD  = 20          # padding between title and top of axes
+FI_HANDLE     = "italic"
+
+# =============================================================================
+# FIGURE & EXPORT
+# =============================================================================
+FIG_W         = 14          # figure width in inches
+FIG_H         = 9.6         # figure height in inches
+FIG_DPI       = 300
+FIG_TOP_PAD   = 0.06        # fraction of figure height reserved above axes
+FIG_BOT_PAD   = 0.045       # fraction of figure height reserved below axes (captions)
+FIXED_OFFSET  = 430_000     # uniform vertical offset for milestone annotations
+
+# =============================================================================
+# DATA
+# =============================================================================
+years      = np.arange(2000, 2101, 1)
+base_year  = 2025
+base_pop   = 411_000
 growth_rate = 0.035
 
 def proj(yr: int) -> int:
@@ -69,8 +107,10 @@ for yr in milestone_years:
     label = "411K  (2025)" if yr == 2025 else fmt_pop(proj(yr))
     milestones[yr] = (p, label)
 
-# Figure — extra headroom top, caption space bottom
-fig, ax = plt.subplots(figsize=(14, 8.8))
+# =============================================================================
+# FIGURE
+# =============================================================================
+fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
 fig.patch.set_facecolor(BG)
 ax.set_facecolor(BG_AX)
 
@@ -94,16 +134,15 @@ ax.plot(hist_years, hist_pops,
 ax.scatter(hist_years, hist_pops,
            color=COL_HIST, s=72, zorder=6, edgecolors=BG, linewidths=1.0)
 
-# Milestones — uniform fixed offset
-FIXED_OFFSET = 430_000
+# Milestones
 for yr, (pop_val, label) in milestones.items():
     t = max(0.0, (yr - 2025) / (2100 - 2025))
     dot_color = COL_HIST if yr <= 2025 else cmap_proj(t)
     ax.annotate(label,
                 xy=(yr, pop_val),
                 xytext=(yr, pop_val + FIXED_OFFSET),
-                fontsize=14,
-                fontweight="bold",
+                fontsize=FS_ANNOT,
+                fontweight=FW_ANNOT,
                 color=COL_ANNOT_TXT,
                 ha="center",
                 arrowprops=dict(arrowstyle="-", color=COL_ANNOT_AR, lw=1.0),
@@ -127,18 +166,18 @@ ax.yaxis.set_major_formatter(
 
 for spine in ax.spines.values():
     spine.set_edgecolor(COL_SPINE)
-ax.tick_params(colors=COL_TICK, labelsize=13)
+ax.tick_params(colors=COL_TICK, labelsize=FS_TICK)
 ax.grid(axis="y", color=COL_GRID_Y, linewidth=0.7, linestyle="--")
 ax.grid(axis="x", color=COL_GRID_X, linewidth=0.45, linestyle=":")
 
-# Title — large, bold, top left
-ax.set_title(title, color=COL_TITLE, fontsize=26, pad=20,
-             fontweight="bold", fontfamily="serif", loc="left", x=0.01)
+# Title
+ax.set_title(title, color=COL_TITLE, fontsize=FS_TITLE, pad=FS_TITLE_PAD,
+             fontweight=FW_TITLE, fontfamily=FF_TITLE, loc="left", x=0.01)
 
-ax.set_xlabel("Year", color=COL_AXIS_LBL, fontsize=13, labelpad=10)
-ax.set_ylabel("Population", color=COL_AXIS_LBL, fontsize=13, labelpad=10)
+ax.set_xlabel("Year", color=COL_AXIS_LBL, fontsize=FS_AXIS_LBL, labelpad=12)
+ax.set_ylabel("Population", color=COL_AXIS_LBL, fontsize=FS_AXIS_LBL, labelpad=12)
 
-# Legend — top LEFT, clear of line, includes subtitle info
+# Legend
 hist_patch = mpatches.Patch(color=COL_HIST, label="Historical data")
 proj_patch = mpatches.Patch(color=COL_PROJ_A,
                              label=f"Projected  ·  2025–2100  ·  ~{growth_rate*100:.1f}%/yr")
@@ -148,23 +187,52 @@ ax.legend(handles=[hist_patch, proj_patch],
           facecolor=BG,
           edgecolor=COL_LEG_EDGE,
           labelcolor=COL_LEG_LBL,
-          fontsize=12,
+          fontsize=FS_LEGEND,
           handlelength=1.4,
           handleheight=1.3,
-          borderpad=0.9)
+          borderpad=1.0)
 
-# Caption row — fully outside axes in figure space
+# Source
 fig.text(0.012, 0.013, source,
-         fontsize=10, color=COL_SOURCE, ha="left", va="bottom",
-         transform=fig.transFigure)
-fig.text(0.988, 0.013, author,
-         fontsize=15, color=COL_HANDLE, ha="right", va="bottom",
-         fontstyle="italic", fontweight="bold",
+         fontsize=FS_SOURCE, color=COL_SOURCE, ha="left", va="bottom",
          transform=fig.transFigure)
 
-# rect as tuple — fixes Pylance reportArgumentType
-plt.tight_layout(rect=(0.0, 0.045, 1.0, 1.0))
-plt.savefig(f"{file}.png", dpi=300, bbox_inches="tight", facecolor=BG)
+# Username — single text object, gradient cyan→violet via a multi-color
+# workaround: render the full string in cyan, then overlay in violet clipped
+# to the right half. Simple & clean — no per-character spacing drift.
+# We use two overlapping texts with a clip rectangle on the top one.
+cmap_handle = LinearSegmentedColormap.from_list("hg", [COL_HANDLE_A, COL_HANDLE_B])
+
+# Render each character individually using consistent monospace-like spacing
+# anchored from the right so overall alignment is stable
+n_chars = len(author)
+# Place a transparent reference text to find the bounding box
+ref = fig.text(0.988, 0.013, author,
+               fontsize=FS_HANDLE, color=(0, 0, 0, 0),
+               ha="right", va="bottom",
+               fontstyle=FI_HANDLE, fontweight=FW_HANDLE,
+               transform=fig.transFigure)
+
+# Draw the visible gradient text on top using a simple two-layer approach:
+# bottom layer full string in start color, top layer full string in end color
+# with alpha fade — gives a smooth left-to-right gradient impression
+t1 = fig.text(0.988, 0.013, author,
+              fontsize=FS_HANDLE, color=COL_HANDLE_A,
+              ha="right", va="bottom",
+              fontstyle=FI_HANDLE, fontweight=FW_HANDLE,
+              transform=fig.transFigure)
+t1.set_path_effects([withStroke(linewidth=3, foreground=COL_GLOW)])
+
+t2 = fig.text(0.988, 0.013, author,
+              fontsize=FS_HANDLE, color=COL_HANDLE_B,
+              ha="right", va="bottom",
+              fontstyle=FI_HANDLE, fontweight=FW_HANDLE,
+              alpha=0.55,
+              transform=fig.transFigure)
+
+# Space above title: achieved by shrinking the axes top boundary
+plt.tight_layout(rect=(0.0, FIG_BOT_PAD, 1.0, 1.0 - FIG_TOP_PAD))
+plt.savefig(f"{file}.png", dpi=FIG_DPI, bbox_inches="tight", facecolor=BG)
 print("Image saved.")
 
 
