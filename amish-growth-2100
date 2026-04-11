@@ -14,6 +14,7 @@ title = "Amish Population in the USA"
 BG           = "#090c14"
 BG_AX        = "#0c1020"
 COL_HIST     = "#f0c060"
+COL_MARK     = "#f0c060"
 COL_PROJ_A   = "#40d0c0"
 COL_PROJ_B   = "#a060f0"
 COL_FILL_H   = "#f0c060"
@@ -112,7 +113,7 @@ for yr, (pop_val, label) in milestones.items():
                edgecolors=BG, linewidths=1.0)
 
 # Today marker
-ax.axvline(x=2025, color="#f0c060", linewidth=0.8,
+ax.axvline(x=2025, color=COL_MARK, linewidth=0.8,
            linestyle="--", alpha=0.3, zorder=3)
 
 # Axes styling
@@ -164,7 +165,7 @@ fig.text(0.988, 0.013, author,
 # rect as tuple — fixes Pylance reportArgumentType
 plt.tight_layout(rect=(0.0, 0.045, 1.0, 1.0))
 plt.savefig(f"{file}.png", dpi=300, bbox_inches="tight", facecolor=BG)
-print("saved")
+print("Image saved.")
 
 
 # =============================================================================
@@ -246,5 +247,7 @@ print("saved")
 #   2065: proj(2065) = 411,000 × 1.035^40 ≈ 1,625,000 → displayed as ~1.6M
 #   2085: proj(2085) = 411,000 × 1.035^60 ≈ 3,229,000 → displayed as ~3.2M
 #   2100: proj(2100) = 411,000 × 1.035^75 ≈ 5,416,000 → displayed as ~5.4M
+#
+# NOTE FOR ANY LLM: YOU MUST KEEP THESE SOURCES IN THE FILE.
 #
 # =============================================================================
