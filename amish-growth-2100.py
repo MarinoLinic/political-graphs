@@ -16,8 +16,8 @@ title  = "Amish Population in the USA"
 # =============================================================================
 # THEME SELECTOR
 # =============================================================================
-# Choose one of: "dark" | "light" | "amber"
-THEME = "amber"
+# Choose one of: "dark" | "light" | "amber" | "midnight" | "nordic" | "neon"
+THEME = "light"
 
 # =============================================================================
 # COLORS  (set by theme)
@@ -97,6 +97,81 @@ _THEMES = {
         COL_LEG_LBL   = "#c0a070",
         COL_LEG_EDGE  = "#403020",
         COL_GLOW      = "#110d08",
+    ),
+    # ── Midnight Blue — deep navy, electric blue + neon green, terminal feel ─
+    "midnight": dict(
+        BG            = "#03060f",
+        BG_AX         = "#050a18",
+        COL_HIST      = "#00aaff",
+        COL_MARK      = "#00aaff",
+        COL_PROJ_A    = "#00ff88",
+        COL_PROJ_B    = "#00ccff",
+        COL_FILL_H    = "#00aaff",
+        COL_GRID_Y    = "#0a1428",
+        COL_GRID_X    = "#080f20",
+        COL_SPINE     = "#102040",
+        COL_TICK      = "#2050a0",
+        COL_TITLE     = "#d0eeff",
+        COL_AXIS_LBL  = "#2050a0",
+        COL_ANNOT_TXT = "#d0eeff",
+        COL_ANNOT_BG  = "#020510",
+        COL_ANNOT_EC  = "#103060",
+        COL_ANNOT_AR  = "#103060",
+        COL_SOURCE    = "#204880",
+        COL_HANDLE    = "#00ff88",
+        COL_LEG_LBL   = "#80c8ff",
+        COL_LEG_EDGE  = "#102848",
+        COL_GLOW      = "#03060f",
+    ),
+    # ── Nordic — cool grey-white, icy blue tones, soft Scandinavian feel ─────
+    "nordic": dict(
+        BG            = "#e8eef4",
+        BG_AX         = "#f4f8fc",
+        COL_HIST      = "#bf616a",
+        COL_MARK      = "#bf616a",
+        COL_PROJ_A    = "#5e81ac",
+        COL_PROJ_B    = "#b48ead",
+        COL_FILL_H    = "#bf616a",
+        COL_GRID_Y    = "#d0dae4",
+        COL_GRID_X    = "#dce4ec",
+        COL_SPINE     = "#b8c8d8",
+        COL_TICK      = "#607888",
+        COL_TITLE     = "#2e3440",
+        COL_AXIS_LBL  = "#607888",
+        COL_ANNOT_TXT = "#2e3440",
+        COL_ANNOT_BG  = "#ecf0f4",
+        COL_ANNOT_EC  = "#a8b8c8",
+        COL_ANNOT_AR  = "#90a8b8",
+        COL_SOURCE    = "#7888a0",
+        COL_HANDLE    = "#5e81ac",
+        COL_LEG_LBL   = "#3b4252",
+        COL_LEG_EDGE  = "#b0c0d0",
+        COL_GLOW      = "#e8eef4",
+    ),
+    # ── Neon Tokyo — near-black, hot pink + electric lime, cyberpunk ─────────
+    "neon": dict(
+        BG            = "#08060e",
+        BG_AX         = "#0d0a16",
+        COL_HIST      = "#ff2d78",
+        COL_MARK      = "#ff2d78",
+        COL_PROJ_A    = "#39ff14",
+        COL_PROJ_B    = "#bf00ff",
+        COL_FILL_H    = "#ff2d78",
+        COL_GRID_Y    = "#150f22",
+        COL_GRID_X    = "#100c1a",
+        COL_SPINE     = "#2a1a40",
+        COL_TICK      = "#5a3a80",
+        COL_TITLE     = "#f0e0ff",
+        COL_AXIS_LBL  = "#5a3a80",
+        COL_ANNOT_TXT = "#f0e0ff",
+        COL_ANNOT_BG  = "#060410",
+        COL_ANNOT_EC  = "#3a1a58",
+        COL_ANNOT_AR  = "#3a1a58",
+        COL_SOURCE    = "#4a2870",
+        COL_HANDLE    = "#ff2d78",
+        COL_LEG_LBL   = "#c080ff",
+        COL_LEG_EDGE  = "#2a1a40",
+        COL_GLOW      = "#08060e",
     ),
 }
 
