@@ -7,7 +7,7 @@ from matplotlib.colors import LinearSegmentedColormap
 # =============================================================================
 # PROJECT SETUP
 # =============================================================================
-file   = "images/cumulative_white_victims_black_on_white_homicides"
+file   = "images/black_on_white_homicides"
 author = "@MarinoLinic"
 source_line1 = 'Sources: BJS "Homicide Trends in the United States" (FBI SHR 1976–2005)'
 source_line2 = 'FBI Expanded Homicide Data Table 6 (single victim/single offender) select years 2006–2025; ~500/yr avg for gaps'
@@ -135,9 +135,13 @@ def deaths(yr: int) -> int:
 cumulative = np.cumsum([deaths(int(y)) for y in years])
 
 def fmt_cum(n: int) -> str:
+    """Round to nearest K (or .1M) for clean milestone labels"""
     if n >= 1_000_000:
-        return f"{n/1_000_000:.1f}M"
-    return f"{n//1_000}K"
+        v = n / 1_000_000
+        s = f"{v:.1f}".rstrip("0").rstrip(".")
+        return f"{s}M"
+    k = round(n / 1000)          # ← changed to round() so 39,699 becomes 40K
+    return f"{k}K"
 
 # Milestones
 milestone_years = [1976, 1985, 1995, 2005, 2015, 2025]
