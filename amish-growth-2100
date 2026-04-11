@@ -3,11 +3,20 @@ import matplotlib.patches as mpatches
 import matplotlib.ticker as mticker
 import numpy as np
 
+# Project setup
+file = "amish_population_2100"
+author = "@MarinoLinic"
+source = "Source: Young Center for Anabaptist & Pietist Studies, Elizabethtown College"
+title = "Amish Population in the USA — Projected Growth 2000–2100"
+
+# Color scheme
+
+
+# Graph
 years = np.arange(2000, 2101, 1)
 base_year = 2025
 base_pop = 411_000
 growth_rate = 0.035
-file = "amish_population_2100"
 
 population = base_pop * (1 + growth_rate) ** (years - base_year)
 
@@ -46,6 +55,7 @@ milestones = {
     2085: (None,     "~3.5M"),
     2100: (None,     "~5.4M"),
 }
+
 for yr, (pop_override, label) in milestones.items():
     pop_val = pop_override if pop_override else float(
         base_pop * (1 + growth_rate) ** (yr - base_year))
@@ -78,9 +88,8 @@ ax.grid(axis="y", color="#1a2535", linewidth=0.6, linestyle="--")
 ax.grid(axis="x", color="#141e2c", linewidth=0.4, linestyle=":")
 
 # Labels
-ax.set_title("Amish Population in the USA — Projected Growth 2000–2100",
-             color="#d8ccb0", fontsize=14, pad=18, fontweight="normal",
-             fontfamily="serif")
+ax.set_title(title, color="#d8ccb0", 
+             fontsize=14, pad=18, fontweight="normal", fontfamily="serif")
 ax.set_xlabel("Year", color="#5a6a7a", fontsize=10, labelpad=8)
 ax.set_ylabel("Population", color="#5a6a7a", fontsize=10, labelpad=8)
 
@@ -93,16 +102,15 @@ leg = ax.legend(handles=[hist_patch, proj_patch],
                 labelcolor="#aabbcc", fontsize=9)
 
 # Source note
-ax.text(0.01, 0.02,
-        "Source: Young Center for Anabaptist & Pietist Studies, Elizabethtown College",
+ax.text(0.01, 0.02, source,
         transform=ax.transAxes, fontsize=7.5, color="#3a4a5a", ha="left")
 
 # Handle
-ax.text(0.99, 0.02, "@MarinoLinic",
+ax.text(0.99, 0.02, author,
         transform=ax.transAxes, fontsize=9.5, color="#5a7a9a",
         ha="right", fontstyle="italic")
 
 plt.tight_layout()
 plt.savefig(f"images/{file}.png",
-            dpi=180, bbox_inches="tight", facecolor="#0d1117")
+            dpi=300, bbox_inches="tight", facecolor="#0d1117")
 print("saved")
