@@ -46,8 +46,8 @@ def fmt_pop(n: int) -> str:
     if n >= 1_000_000:
         v = n / 1_000_000
         s = f"{v:.1f}".rstrip("0").rstrip(".")
-        return f"~{s}M"
-    return f"~{n // 1_000}K"
+        return f"{s}M"
+    return f"{n // 1_000}K"
 
 population = np.array([proj(int(y)) for y in years], dtype=float)
 
