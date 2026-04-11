@@ -1,0 +1,108 @@
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.ticker as mticker
+import numpy as np
+
+years = np.arange(2000, 2101, 1)
+base_year = 2025
+base_pop = 411_000
+growth_rate = 0.035
+file = "amish_population_2100"
+
+population = base_pop * (1 + growth_rate) ** (years - base_year)
+
+historical = {2000: 166_000, 2005: 198_000, 2010: 249_000,
+              2015: 308_000, 2020: 364_000, 2025: 411_000}
+hist_years = list(historical.keys())
+hist_pops  = list(historical.values())
+
+fig, ax = plt.subplots(figsize=(12, 7))
+fig.patch.set_facecolor("#0d1117")
+ax.set_facecolor("#0d1117")
+
+# Subtle gradient fill under curve
+ax.fill_between(years, population, alpha=0.08, color="#7eb8d4")
+ax.fill_between(years, population,
+                where=(years <= 2025), alpha=0.18, color="#c8a96e")
+
+# Main projected line
+proj_mask = years >= 2025
+ax.plot(years[proj_mask], population[proj_mask],
+        color="#7eb8d4", linewidth=2.5, solid_capstyle="round", zorder=4)
+
+# Historical line
+hist_years_dense = np.array(hist_years)
+hist_pops_dense  = np.array(hist_pops)
+ax.plot(hist_years_dense, hist_pops_dense,
+        color="#c8a96e", linewidth=2.5, solid_capstyle="round", zorder=5)
+ax.scatter(hist_years_dense, hist_pops_dense,
+           color="#c8a96e", s=55, zorder=6)
+
+# Annotation milestones
+milestones = {
+    2025: (411_000,  "411K (today)"),
+    2045: (None,     "~820K"),
+    2065: (None,     "~1.7M"),
+    2085: (None,     "~3.5M"),
+    2100: (None,     "~5.4M"),
+}
+for yr, (pop_override, label) in milestones.items():
+    pop_val = pop_override if pop_override else float(
+        base_pop * (1 + growth_rate) ** (yr - base_year))
+    offset_y = pop_val * 0.08 + 150_000
+    ax.annotate(label,
+                xy=(yr, pop_val),
+                xytext=(yr, pop_val + offset_y),
+                fontsize=8.5,
+                color="#aabbcc",
+                ha="center",
+                arrowprops=dict(arrowstyle="-", color="#445566",
+                                lw=0.8),
+                bbox=dict(boxstyle="round,pad=0.3", fc="#111c2a",
+                          ec="#2a3a4a", lw=0.7))
+    ax.scatter([yr], [pop_val], color="#7eb8d4" if yr > 2025 else "#c8a96e",
+               s=50, zorder=7)
+
+# Axes styling
+ax.set_xlim(1998, 2103)
+ax.set_ylim(-300_000, 6_000_000)
+ax.xaxis.set_major_locator(mticker.MultipleLocator(10))
+ax.yaxis.set_major_formatter(
+    mticker.FuncFormatter(lambda x, _: f"{x/1e6:.0f}M" if x >= 1e6
+                          else (f"{x/1e3:.0f}K" if x > 0 else "")))
+
+for spine in ax.spines.values():
+    spine.set_edgecolor("#1e2a38")
+ax.tick_params(colors="#4a5a6a", labelsize=9)
+ax.grid(axis="y", color="#1a2535", linewidth=0.6, linestyle="--")
+ax.grid(axis="x", color="#141e2c", linewidth=0.4, linestyle=":")
+
+# Labels
+ax.set_title("Amish Population in the USA — Projected Growth 2000–2100",
+             color="#d8ccb0", fontsize=14, pad=18, fontweight="normal",
+             fontfamily="serif")
+ax.set_xlabel("Year", color="#5a6a7a", fontsize=10, labelpad=8)
+ax.set_ylabel("Population", color="#5a6a7a", fontsize=10, labelpad=8)
+
+# Legend
+hist_patch = mpatches.Patch(color="#c8a96e", label="Historical data")
+proj_patch = mpatches.Patch(color="#7eb8d4", label="Projected (~3.5%/yr)")
+leg = ax.legend(handles=[hist_patch, proj_patch],
+                loc="upper left", framealpha=0.25,
+                facecolor="#0d1117", edgecolor="#2a3a4a",
+                labelcolor="#aabbcc", fontsize=9)
+
+# Source note
+ax.text(0.01, 0.02,
+        "Source: Young Center for Anabaptist & Pietist Studies, Elizabethtown College",
+        transform=ax.transAxes, fontsize=7.5, color="#3a4a5a", ha="left")
+
+# Handle
+ax.text(0.99, 0.02, "@MarinoLinic",
+        transform=ax.transAxes, fontsize=9.5, color="#5a7a9a",
+        ha="right", fontstyle="italic")
+
+plt.tight_layout()
+plt.savefig(f"images/{file}.png",
+            dpi=180, bbox_inches="tight", facecolor="#0d1117")
+print("saved")
