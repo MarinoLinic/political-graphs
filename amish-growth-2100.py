@@ -223,7 +223,7 @@ FI_HANDLE     = "italic"
 # =============================================================================
 FIG_W         = 14          # figure width in inches
 FIG_H         = 9.6         # figure height in inches
-FIG_DPI       = 300
+FIG_DPI       = 400
 
 # Explicit margin fractions — fraction of figure width/height reserved as
 # whitespace on each side. Tune these to control padding symmetry.
