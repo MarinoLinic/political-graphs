@@ -17,7 +17,7 @@ title  = "Amish Population in the USA"
 # THEME SELECTOR
 # =============================================================================
 # Choose one of: "dark" | "light" | "amber"
-THEME = "dark"
+THEME = "amber"
 
 # =============================================================================
 # COLORS  (set by theme)
@@ -322,7 +322,7 @@ fig.text(1.0 - MARGIN["right"], CAPTION_Y, author,
          transform=fig.transFigure)
 
 # No tight_layout — axes are placed manually via MARGIN above.
-plt.savefig(f"{file}.png", dpi=FIG_DPI, facecolor=BG)
+plt.savefig(f"{file}-{THEME}.png", dpi=FIG_DPI, facecolor=BG)
 print("Image saved.")
 
 
