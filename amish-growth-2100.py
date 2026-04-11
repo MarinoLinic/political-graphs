@@ -14,31 +14,115 @@ source = "Source: Young Center for Anabaptist & Pietist Studies, Elizabethtown C
 title  = "Amish Population in the USA"
 
 # =============================================================================
-# COLORS
+# THEME SELECTOR
 # =============================================================================
-BG            = "#090c14"
-BG_AX         = "#0c1020"
-COL_HIST      = "#f0c060"
-COL_MARK      = "#f0c060"
-COL_PROJ_A    = "#40d0c0"
-COL_PROJ_B    = "#a060f0"
-COL_FILL_H    = "#f0c060"
-COL_GRID_Y    = "#14203a"
-COL_GRID_X    = "#101828"
-COL_SPINE     = "#1e2a3a"
-COL_TICK      = "#506070"
-COL_TITLE     = "#eee8d0"
-COL_AXIS_LBL  = "#506070"
-COL_ANNOT_TXT = "#c8dce8"
-COL_ANNOT_BG  = "#0a1422"
-COL_ANNOT_EC  = "#304050"
-COL_ANNOT_AR  = "#304858"
-COL_SOURCE    = "#485e72"
-COL_HANDLE_A  = "#40d0c0"   # gradient start — matches proj line cyan
-COL_HANDLE_B  = "#a060f0"   # gradient end   — matches proj line violet
-COL_LEG_LBL   = "#a0bcd0"
-COL_LEG_EDGE  = "#283848"
-COL_GLOW      = "#090c14"   # path effect stroke color for username
+# Choose one of: "dark" | "light" | "amber"
+THEME = "dark"
+
+# =============================================================================
+# COLORS  (set by theme)
+# =============================================================================
+_THEMES = {
+    # ── Dark (original) ──────────────────────────────────────────────────────
+    "dark": dict(
+        BG            = "#090c14",
+        BG_AX         = "#0c1020",
+        COL_HIST      = "#f0c060",
+        COL_MARK      = "#f0c060",
+        COL_PROJ_A    = "#40d0c0",
+        COL_PROJ_B    = "#a060f0",
+        COL_FILL_H    = "#f0c060",
+        COL_GRID_Y    = "#14203a",
+        COL_GRID_X    = "#101828",
+        COL_SPINE     = "#1e2a3a",
+        COL_TICK      = "#506070",
+        COL_TITLE     = "#eee8d0",
+        COL_AXIS_LBL  = "#506070",
+        COL_ANNOT_TXT = "#c8dce8",
+        COL_ANNOT_BG  = "#0a1422",
+        COL_ANNOT_EC  = "#304050",
+        COL_ANNOT_AR  = "#304858",
+        COL_SOURCE    = "#485e72",
+        COL_HANDLE    = "#c8e8f8",   # username: light cyan-white, clearly visible
+        COL_LEG_LBL   = "#a0bcd0",
+        COL_LEG_EDGE  = "#283848",
+        COL_GLOW      = "#090c14",
+    ),
+    # ── Light ────────────────────────────────────────────────────────────────
+    "light": dict(
+        BG            = "#f4f1eb",
+        BG_AX         = "#ffffff",
+        COL_HIST      = "#c07820",
+        COL_MARK      = "#c07820",
+        COL_PROJ_A    = "#1899a0",
+        COL_PROJ_B    = "#7030c0",
+        COL_FILL_H    = "#c07820",
+        COL_GRID_Y    = "#ddd8cc",
+        COL_GRID_X    = "#e8e4dc",
+        COL_SPINE     = "#c8c0b0",
+        COL_TICK      = "#808070",
+        COL_TITLE     = "#1a1814",
+        COL_AXIS_LBL  = "#707060",
+        COL_ANNOT_TXT = "#1a1814",
+        COL_ANNOT_BG  = "#fffff8",
+        COL_ANNOT_EC  = "#b0a898",
+        COL_ANNOT_AR  = "#908880",
+        COL_SOURCE    = "#909080",
+        COL_HANDLE    = "#4a3080",   # username: deep violet, stands out on light bg
+        COL_LEG_LBL   = "#404030",
+        COL_LEG_EDGE  = "#c0b8a8",
+        COL_GLOW      = "#f4f1eb",
+    ),
+    # ── Amber (warm dark — parchment tones on deep brown) ────────────────────
+    "amber": dict(
+        BG            = "#110d08",
+        BG_AX         = "#160f09",
+        COL_HIST      = "#e8a030",
+        COL_MARK      = "#e8a030",
+        COL_PROJ_A    = "#e05030",
+        COL_PROJ_B    = "#f0c040",
+        COL_FILL_H    = "#e8a030",
+        COL_GRID_Y    = "#231808",
+        COL_GRID_X    = "#1c1208",
+        COL_SPINE     = "#302010",
+        COL_TICK      = "#705840",
+        COL_TITLE     = "#f0e0c0",
+        COL_AXIS_LBL  = "#705840",
+        COL_ANNOT_TXT = "#f0ddb0",
+        COL_ANNOT_BG  = "#0e0a05",
+        COL_ANNOT_EC  = "#503820",
+        COL_ANNOT_AR  = "#503820",
+        COL_SOURCE    = "#604830",
+        COL_HANDLE    = "#f0c878",   # username: warm gold, vivid against dark brown
+        COL_LEG_LBL   = "#c0a070",
+        COL_LEG_EDGE  = "#403020",
+        COL_GLOW      = "#110d08",
+    ),
+}
+
+_c = _THEMES[THEME]
+BG            = _c["BG"]
+BG_AX         = _c["BG_AX"]
+COL_HIST      = _c["COL_HIST"]
+COL_MARK      = _c["COL_MARK"]
+COL_PROJ_A    = _c["COL_PROJ_A"]
+COL_PROJ_B    = _c["COL_PROJ_B"]
+COL_FILL_H    = _c["COL_FILL_H"]
+COL_GRID_Y    = _c["COL_GRID_Y"]
+COL_GRID_X    = _c["COL_GRID_X"]
+COL_SPINE     = _c["COL_SPINE"]
+COL_TICK      = _c["COL_TICK"]
+COL_TITLE     = _c["COL_TITLE"]
+COL_AXIS_LBL  = _c["COL_AXIS_LBL"]
+COL_ANNOT_TXT = _c["COL_ANNOT_TXT"]
+COL_ANNOT_BG  = _c["COL_ANNOT_BG"]
+COL_ANNOT_EC  = _c["COL_ANNOT_EC"]
+COL_ANNOT_AR  = _c["COL_ANNOT_AR"]
+COL_SOURCE    = _c["COL_SOURCE"]
+COL_HANDLE    = _c["COL_HANDLE"]
+COL_LEG_LBL   = _c["COL_LEG_LBL"]
+COL_LEG_EDGE  = _c["COL_LEG_EDGE"]
+COL_GLOW      = _c["COL_GLOW"]
 
 # =============================================================================
 # TEXT SIZES & STYLES
@@ -49,7 +133,7 @@ FS_TICK       = 14
 FS_LEGEND     = 14
 FS_ANNOT      = 14
 FS_SOURCE     = 11
-FS_HANDLE     = 17
+FS_HANDLE     = 17           # kept for reference; actual size set by FS_HANDLE_NEW below
 
 FW_TITLE      = "bold"
 FW_ANNOT      = "bold"
@@ -65,8 +149,27 @@ FI_HANDLE     = "italic"
 FIG_W         = 14          # figure width in inches
 FIG_H         = 9.6         # figure height in inches
 FIG_DPI       = 300
-FIG_TOP_PAD   = 0.06        # fraction of figure height reserved above axes
-FIG_BOT_PAD   = 0.045       # fraction of figure height reserved below axes (captions)
+
+# Explicit margin fractions — fraction of figure width/height reserved as
+# whitespace on each side. Tune these to control padding symmetry.
+# bbox_inches="tight" is intentionally NOT used on save so these are respected.
+MARGIN = dict(
+    top    = 0.12,   # above axes (title lives here)
+    bottom = 0.16,   # below axes (source + username live here; extra space for x-label)
+    left   = 0.09,   # left of axes (y-axis label + ticks live here)
+    right  = 0.04,   # right of axes
+)
+
+# Caption row — vertical position of source & username within the bottom margin.
+# Expressed as a fraction of the full figure height (not relative to margin).
+# Keep this well below MARGIN["bottom"] so it never overlaps the x-axis label.
+CAPTION_Y        = 0.032   # y position (figure fraction) for source & username baseline
+CAPTION_VA       = "bottom"  # vertical anchor for caption text
+
+# Username styling
+FS_HANDLE_NEW    = 20        # slightly larger than before
+HANDLE_GLOW_LW   = 4        # linewidth of the glow/stroke path effect
+
 FIXED_OFFSET  = 430_000     # uniform vertical offset for milestone annotations
 
 # =============================================================================
@@ -110,8 +213,17 @@ for yr in milestone_years:
 # =============================================================================
 # FIGURE
 # =============================================================================
-fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
+fig = plt.figure(figsize=(FIG_W, FIG_H))
 fig.patch.set_facecolor(BG)
+
+# Place axes manually using MARGIN fractions — this is the key change.
+# No tight_layout, no bbox_inches="tight" — we own every pixel.
+ax = fig.add_axes((
+    MARGIN["left"],
+    MARGIN["bottom"],
+    1.0 - MARGIN["left"] - MARGIN["right"],
+    1.0 - MARGIN["top"]  - MARGIN["bottom"],
+))
 ax.set_facecolor(BG_AX)
 
 # Gradient projected line
@@ -170,9 +282,14 @@ ax.tick_params(colors=COL_TICK, labelsize=FS_TICK)
 ax.grid(axis="y", color=COL_GRID_Y, linewidth=0.7, linestyle="--")
 ax.grid(axis="x", color=COL_GRID_X, linewidth=0.45, linestyle=":")
 
-# Title
-ax.set_title(title, color=COL_TITLE, fontsize=FS_TITLE, pad=FS_TITLE_PAD,
-             fontweight=FW_TITLE, fontfamily=FF_TITLE, loc="left", x=0.01)
+# Title — placed in figure coordinates so it sits in the top margin,
+# horizontally aligned with the left edge of the axes.
+fig.text(MARGIN["left"], 1.0 - MARGIN["top"] * 0.5,
+         title,
+         color=COL_TITLE, fontsize=FS_TITLE,
+         fontweight=FW_TITLE, fontfamily=FF_TITLE,
+         ha="left", va="top",
+         transform=fig.transFigure)
 
 ax.set_xlabel("Year", color=COL_AXIS_LBL, fontsize=FS_AXIS_LBL, labelpad=12)
 ax.set_ylabel("Population", color=COL_AXIS_LBL, fontsize=FS_AXIS_LBL, labelpad=12)
@@ -192,47 +309,20 @@ ax.legend(handles=[hist_patch, proj_patch],
           handleheight=1.3,
           borderpad=1.0)
 
-# Source
-fig.text(0.012, 0.013, source,
-         fontsize=FS_SOURCE, color=COL_SOURCE, ha="left", va="bottom",
+# Source — pinned to CAPTION_Y, well clear of the x-axis label
+fig.text(MARGIN["left"], CAPTION_Y, source,
+         fontsize=FS_SOURCE, color=COL_SOURCE, ha="left", va=CAPTION_VA,
          transform=fig.transFigure)
 
-# Username — single text object, gradient cyan→violet via a multi-color
-# workaround: render the full string in cyan, then overlay in violet clipped
-# to the right half. Simple & clean — no per-character spacing drift.
-# We use two overlapping texts with a clip rectangle on the top one.
-cmap_handle = LinearSegmentedColormap.from_list("hg", [COL_HANDLE_A, COL_HANDLE_B])
+# Username — single clean text, slightly lighter/brighter than source for visibility
+fig.text(1.0 - MARGIN["right"], CAPTION_Y, author,
+         fontsize=FS_HANDLE_NEW, color=COL_HANDLE,
+         ha="right", va=CAPTION_VA,
+         fontstyle=FI_HANDLE, fontweight=FW_HANDLE,
+         transform=fig.transFigure)
 
-# Render each character individually using consistent monospace-like spacing
-# anchored from the right so overall alignment is stable
-n_chars = len(author)
-# Place a transparent reference text to find the bounding box
-ref = fig.text(0.988, 0.013, author,
-               fontsize=FS_HANDLE, color=(0, 0, 0, 0),
-               ha="right", va="bottom",
-               fontstyle=FI_HANDLE, fontweight=FW_HANDLE,
-               transform=fig.transFigure)
-
-# Draw the visible gradient text on top using a simple two-layer approach:
-# bottom layer full string in start color, top layer full string in end color
-# with alpha fade — gives a smooth left-to-right gradient impression
-t1 = fig.text(0.988, 0.013, author,
-              fontsize=FS_HANDLE, color=COL_HANDLE_A,
-              ha="right", va="bottom",
-              fontstyle=FI_HANDLE, fontweight=FW_HANDLE,
-              transform=fig.transFigure)
-t1.set_path_effects([withStroke(linewidth=3, foreground=COL_GLOW)])
-
-t2 = fig.text(0.988, 0.013, author,
-              fontsize=FS_HANDLE, color=COL_HANDLE_B,
-              ha="right", va="bottom",
-              fontstyle=FI_HANDLE, fontweight=FW_HANDLE,
-              alpha=0.55,
-              transform=fig.transFigure)
-
-# Space above title: achieved by shrinking the axes top boundary
-plt.tight_layout(rect=(0.0, FIG_BOT_PAD, 1.0, 1.0 - FIG_TOP_PAD))
-plt.savefig(f"{file}.png", dpi=FIG_DPI, bbox_inches="tight", facecolor=BG)
+# No tight_layout — axes are placed manually via MARGIN above.
+plt.savefig(f"{file}.png", dpi=FIG_DPI, facecolor=BG)
 print("Image saved.")
 
 
@@ -316,6 +406,6 @@ print("Image saved.")
 #   2085: proj(2085) = 411,000 × 1.035^60 ≈ 3,229,000 → displayed as ~3.2M
 #   2100: proj(2100) = 411,000 × 1.035^75 ≈ 5,416,000 → displayed as ~5.4M
 #
-# NOTE FOR ANY LLM: YOU MUST KEEP THESE SOURCES IN THE FILE.
+# NOTE FOR ANYONE READING THIS: YOU MUST KEEP THESE SOURCES IN THE FILE.
 #
 # =============================================================================
