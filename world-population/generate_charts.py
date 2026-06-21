@@ -17,13 +17,16 @@ CHARTS PRODUCED (output/images/):
     05_over65_by_region.png                 horizontal bar
     06_population_treemap.png               proportional treemap
     07_population_share_donut.png           donut / pie
-    08_age_structure_by_region.png          stacked bars: 0-19 / 20-39 / 40-64 / 65+
-    09_top20_countries_population.png       horizontal bar, country-level
-    10_youth_share_vs_size_bubble.png       bubble chart: region size vs. % under 40
-    11_world_map_under40_pct.png        choropleth: share under 40 (needs shapefile)
-    12_world_map_under20_pct.png        choropleth: share under 20 (needs shapefile)
-    13_world_map_age0to4_pct.png        choropleth: share ages 0-4 (needs shapefile)
-    14_world_map_over65_pct.png         choropleth: share 65+ (needs shapefile)
+    08_age_structure_by_region.png          stacked bars (sorted by 0-4 share)
+    09_share_comparison_under40.png         paired bars: region % of under-40 vs. total pop
+    10_share_comparison_under20.png         paired bars: region % of under-20 vs. total pop
+    11_share_comparison_age0to4.png         paired bars: region % of 0-4 vs. total pop
+    12_share_comparison_over65.png          paired bars: region % of 65+ vs. total pop
+    13_youth_share_vs_size_bubble.png       bubble chart: region size vs. % under 40
+    14_world_map_under40_pct.png            choropleth: share under 40 (needs shapefile)
+    15_world_map_under20_pct.png            choropleth: share under 20 (needs shapefile)
+    16_world_map_age0to4_pct.png            choropleth: share ages 0-4 (needs shapefile)
+    17_world_map_over65_pct.png             choropleth: share 65+ (needs shapefile)
     (The total-population choropleth is omitted — India/China dominate so
      completely that every other country washes out on a linear scale.)
 
@@ -369,7 +372,7 @@ def chart_donut(rows):
 # ===========================================================================
 
 def chart_age_structure(rows):
-    data = sorted(rows, key=lambda r: r["TotalPop_M"], reverse=True)
+    data = sorted(rows, key=lambda r: r["Age0to4_pct"], reverse=True)
     names = [r["Region"] for r in data]
 
     seg_0_19 = [r["Under20_pct"] for r in data]
@@ -415,44 +418,115 @@ def chart_age_structure(rows):
 
 
 # ===========================================================================
-# CHART 09: top 20 countries by population
+# CHARTS 09-12: demographic share vs. total population share — paired bars
+#
+# For each age metric, each region gets two side-by-side bars:
+#   - its share of the TOTAL world population (grey reference bar)
+#   - its share of THAT demographic globally (coloured bar)
+# Sorted by demographic share descending so the most over-represented
+# regions rise to the top.
 # ===========================================================================
 
-def chart_top_countries(country_rows, n=20):
-    data = sorted(country_rows, key=lambda r: r["TotalPop_thousands"], reverse=True)[:n]
-    names = [r["Country"] for r in data]
-    vals_m = [r["TotalPop_thousands"] / 1000 for r in data]
-    vmax = max(vals_m)
-    norm = mcolors.Normalize(vmin=0, vmax=vmax)
+SHARE_METRICS = [
+    ("09_share_comparison_under40.png",
+     "Under40_M",  "TotalPop_M",
+     "Regional Share: Under-40 vs. Total Population",
+     f"Each region's % of world under-40 population vs. its % of world total · {YEAR}"),
+    ("10_share_comparison_under20.png",
+     "Under20_M",  "TotalPop_M",
+     "Regional Share: Under-20 vs. Total Population",
+     f"Each region's % of world under-20 population vs. its % of world total · {YEAR}"),
+    ("11_share_comparison_age0to4.png",
+     "Age0to4_M",  "TotalPop_M",
+     "Regional Share: Ages 0-4 vs. Total Population",
+     f"Each region's % of world 0-4 population vs. its % of world total · {YEAR}"),
+    ("12_share_comparison_over65.png",
+     "Over65_M",   "TotalPop_M",
+     "Regional Share: 65+ vs. Total Population",
+     f"Each region's % of world 65+ population vs. its % of world total · {YEAR}"),
+]
 
-    fig, ax, ax_left, fig_h, source_h = new_figure(8.6, 7.6, left_margin_in=0.45)
-    y_pos = list(range(len(data)))[::-1]
-    bar_h = 0.62
-    for y, name, v in zip(y_pos, names, vals_m):
-        color = CMAP(norm(v))
-        ax.add_patch(FancyBboxPatch((0, y - bar_h / 2), v, bar_h,
-                                     boxstyle="round,pad=0,rounding_size=0.18",
-                                     facecolor=color, edgecolor="none", zorder=3))
-        ax.text(-vmax * 0.015, y, name, ha="right", va="center",
+# Visual treatment for the two bar types
+_COL_DEMO  = ACCENT_TEAL   # coloured bar = demographic share
+_COL_TOTAL = "#C8C2B6"     # neutral grey  = total pop share
+
+
+def chart_share_comparison(rows, demo_key, total_key, filename, title, subtitle):
+    world_demo  = sum(r[demo_key]  for r in rows)
+    world_total = sum(r[total_key] for r in rows)
+
+    # Build (region, demo_share, total_share) and sort by demo share desc
+    data = sorted(
+        [
+            (r["Region"],
+             r[demo_key]  / world_demo  * 100 if world_demo  else 0,
+             r[total_key] / world_total * 100 if world_total else 0)
+            for r in rows
+        ],
+        key=lambda t: t[1], reverse=True,
+    )
+
+    n = len(data)
+    # Each region gets two bars; add a small gap between region groups
+    bar_h   = 0.30   # height of each individual bar
+    gap     = 0.18   # gap between the two bars within a group
+    stride  = 1.0    # vertical distance between group centres
+
+    fig, ax, ax_left, fig_h, source_h = new_figure(8.6, n * stride + 0.4,
+                                                     left_margin_in=0.35,
+                                                     right_margin_in=0.55)
+    vmax = max(max(ds, ts) for _, ds, ts in data) * 1.0
+
+    for i, (name, demo_share, total_share) in enumerate(data):
+        y_centre = (n - 1 - i) * stride   # top region at the top
+
+        y_demo  = y_centre + gap / 2
+        y_total = y_centre - gap / 2 - bar_h
+
+        # Demographic bar (coloured)
+        ax.add_patch(FancyBboxPatch(
+            (0, y_demo), demo_share, bar_h,
+            boxstyle="round,pad=0,rounding_size=0.10",
+            facecolor=_COL_DEMO, edgecolor="none", zorder=3))
+        ax.text(demo_share + vmax * 0.015, y_demo + bar_h / 2,
+                f"{demo_share:.1f}%", va="center", ha="left",
+                fontsize=8.5, fontweight="bold", color=_COL_DEMO, zorder=4)
+
+        # Total-population bar (grey reference)
+        ax.add_patch(FancyBboxPatch(
+            (0, y_total), total_share, bar_h,
+            boxstyle="round,pad=0,rounding_size=0.10",
+            facecolor=_COL_TOTAL, edgecolor="none", zorder=3))
+        ax.text(total_share + vmax * 0.015, y_total + bar_h / 2,
+                f"{total_share:.1f}%", va="center", ha="left",
+                fontsize=8.5, color=MUTED, zorder=4)
+
+        # Region label to the left, centred on the group
+        ax.text(-vmax * 0.02, y_centre + (bar_h - gap) / 2,
+                name, ha="right", va="center",
                 fontsize=9.5, fontweight="bold", color=INK, zorder=4)
-        lum = 0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]
-        chip_color = ACCENT_TEAL if lum < 0.6 else ACCENT_WINE
-        ax.text(v + vmax * 0.02, y, fmt_m(v), ha="left", va="center", fontsize=9,
-                fontweight="bold", color="white", zorder=5,
-                bbox=dict(boxstyle="round,pad=0.28,rounding_size=0.3",
-                          facecolor=chip_color, edgecolor="none", alpha=0.96))
 
-    ax.set_xlim(-vmax * 0.46, vmax * 1.2)
-    ax.set_ylim(-0.7, len(data) - 0.3)
+    ax.set_xlim(-vmax * 0.58, vmax * 1.22)
+    ax.set_ylim(-stride * 0.6, (n - 1) * stride + stride * 0.6)
     ax.axis("off")
-    add_titles(ax, f"Top {n} Countries by Population", f"{YEAR} estimates")
+
+    # Legend
+    from matplotlib.patches import Patch
+    handles = [
+        Patch(facecolor=_COL_DEMO,  label="Share of demographic"),
+        Patch(facecolor=_COL_TOTAL, label="Share of world population"),
+    ]
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.03),
+              ncol=2, frameon=False, fontsize=9, labelcolor=INK, handlelength=1.2)
+
+    add_titles(ax, title, subtitle)
     add_footer(fig, ax_left, fig_h, source_h,
                "Source: UN World Population Prospects 2024, medium variant.")
-    save(fig, "09_top20_countries_population.png")
+    save(fig, filename)
 
 
 # ===========================================================================
-# CHART 10: bubble chart — region size vs. youth share
+# CHART 13: bubble chart — region size vs. youth share
 # ===========================================================================
 
 def chart_bubble(rows):
@@ -484,7 +558,7 @@ def chart_bubble(rows):
                f"Bubble size = total population · {YEAR} estimates")
     add_footer(fig, ax_left, fig_h, source_h,
                "Source: UN World Population Prospects 2024, medium variant.")
-    save(fig, "10_youth_share_vs_size_bubble.png")
+    save(fig, "13_youth_share_vs_size_bubble.png")
 
 
 # ===========================================================================
@@ -495,13 +569,13 @@ def chart_bubble(rows):
 # ===========================================================================
 
 MAP_METRICS = [
-    ("Under40_pct",   "11_world_map_under40_pct.png",
+    ("Under40_pct",   "14_world_map_under40_pct.png",
      "Share of Population Under 40, by Country",   f"{YEAR} estimates, %"),
-    ("Under20_pct",   "12_world_map_under20_pct.png",
+    ("Under20_pct",   "15_world_map_under20_pct.png",
      "Share of Population Under 20, by Country",   f"{YEAR} estimates, %"),
-    ("Age0to4_pct",   "13_world_map_age0to4_pct.png",
+    ("Age0to4_pct",   "16_world_map_age0to4_pct.png",
      "Share of Population Ages 0-4, by Country",   f"{YEAR} estimates, %"),
-    ("Over65_pct",    "14_world_map_over65_pct.png",
+    ("Over65_pct",    "17_world_map_over65_pct.png",
      "Share of Population 65+, by Country",        f"{YEAR} estimates, %"),
 ]
 
@@ -515,7 +589,7 @@ def chart_world_maps(country_rows):
 
     if not shp_candidates:
         print(f"\n[skip] No .shp file found in {MAP_DIR} — skipping the world map "
-              f"charts (11-14). See the instructions at the bottom of "
+              f"charts (14-17). See the instructions at the bottom of "
               f"generate_charts.py for where to download one.")
         return
 
@@ -523,7 +597,7 @@ def chart_world_maps(country_rows):
         import geopandas as gpd
     except ImportError:
         print("\n[skip] geopandas is not installed, so the world map charts "
-              "(11-14) were skipped. Install it with:\n"
+              "(14-17) were skipped. Install it with:\n"
               "    pip install geopandas --break-system-packages")
         return
 
@@ -537,7 +611,7 @@ def chart_world_maps(country_rows):
             break
     if iso_col is None:
         print(f"\n[skip] Couldn't find an ISO3 country-code column in {shp_path} "
-              f"(looked for ISO_A3 / ISO_A3_EH / ADM0_A3 / ISO3). Charts 11-14 skipped.")
+              f"(looked for ISO_A3 / ISO_A3_EH / ADM0_A3 / ISO3). Charts 14-17 skipped.")
         return
 
     by_iso3 = {r["ISO3"]: r for r in country_rows}
@@ -599,7 +673,10 @@ def main():
     chart_treemap(region_rows)
     chart_donut(region_rows)
     chart_age_structure(region_rows)
-    chart_top_countries(country_rows, n=20)
+
+    for filename, demo_key, total_key, title, subtitle in SHARE_METRICS:
+        chart_share_comparison(region_rows, demo_key, total_key, filename, title, subtitle)
+
     chart_bubble(region_rows)
     chart_world_maps(country_rows)
 
