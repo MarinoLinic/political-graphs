@@ -53,3 +53,8 @@ run_all.py                     (the only script you actually run)
   adds a new entry in a future WPP release), `aggregate_by_region.py`
   will print an "UNMATCHED" warning to the console rather than silently
   dropping it — check that output if numbers look off after a refresh.
+
+
+## Chart publication check: November 14, 2026
+
+The share-comparison charts use grouped demographic and population-reference bars. The four world maps retain the local Natural Earth boundary input; the age65+ palette runs in the opposite direction to the younger-age maps. The five-field map descriptor is unpacked consistently during country-data attachment and rendering. Regenerated only the four missing map exports from the existing country CSV and local shapefile; no source download or API key was needed. Existing regional inputs and aggregation were unchanged.

@@ -145,8 +145,8 @@ def add_titles(ax, title, subtitle):
             fontsize=10.5, fontweight="medium", color=ACCENT_TEAL)
 
 
-def add_footer(fig, ax_left, fig_h_in, source_h_in, line1):
-    fig.text(ax_left, source_h_in / fig_h_in * 0.78, line1,
+def add_footer(fig, ax_left, fig_h_in, source_h_in, line1, position=0.78):
+    fig.text(ax_left, source_h_in / fig_h_in * position, line1,
               ha="left", va="center", fontsize=7, color=MUTED)
 
 
@@ -446,16 +446,17 @@ SHARE_METRICS = [
      f"Each region's % of world 65+ population vs. its % of world total · {YEAR}"),
 ]
 
-# Visual treatment for the two bar types
-_COL_DEMO  = ACCENT_TEAL   # coloured bar = demographic share
-_COL_TOTAL = "#C8C2B6"     # neutral grey  = total pop share
+# Grouped bar colours
+_COL_DEMO  = ACCENT_TEAL   # main bar — demographic share
+_COL_REF   = "#C2BAB0"     # thin reference bar — total pop share
+_COL_OVER  = ACCENT_TEAL
+_COL_UNDER = ACCENT_WINE
 
 
 def chart_share_comparison(rows, demo_key, total_key, filename, title, subtitle):
     world_demo  = sum(r[demo_key]  for r in rows)
     world_total = sum(r[total_key] for r in rows)
 
-    # Build (region, demo_share, total_share) and sort by demo share desc
     data = sorted(
         [
             (r["Region"],
@@ -466,62 +467,95 @@ def chart_share_comparison(rows, demo_key, total_key, filename, title, subtitle)
         key=lambda t: t[1], reverse=True,
     )
 
-    n = len(data)
-    # Each region gets two bars; add a small gap between region groups
-    bar_h   = 0.30   # height of each individual bar
-    gap     = 0.18   # gap between the two bars within a group
-    stride  = 1.0    # vertical distance between group centres
+    n      = len(data)
+    names  = [d[0] for d in data]
+    demos  = [d[1] for d in data]
+    totals = [d[2] for d in data]
 
-    fig, ax, ax_left, fig_h, source_h = new_figure(8.6, n * stride + 0.4,
-                                                     left_margin_in=0.35,
-                                                     right_margin_in=0.55)
-    vmax = max(max(ds, ts) for _, ds, ts in data) * 1.0
+    # Bar geometry: main bar wide, reference bar clearly thinner
+    w_main = 0.38
+    w_ref  = 0.18
+    gap    = 0.04   # gap between the two bars in a group
+    # main bar centred slightly left, reference bar snug to its right
+    x_main = [i - (w_ref + gap) / 2 for i in range(n)]
+    x_ref  = [i + w_main / 2 + gap  for i in range(n)]
 
-    for i, (name, demo_share, total_share) in enumerate(data):
-        y_centre = (n - 1 - i) * stride   # top region at the top
+    # Extra bottom margin so x-axis labels don't clash with the source line
+    fig, ax, ax_left, fig_h, source_h = new_figure(
+        9.6, 5.0,
+        title_h_in=1.05, source_h_in=1.10,   # taller source zone = labels clear
+        left_margin_in=0.50, right_margin_in=0.40,
+    )
 
-        y_demo  = y_centre + gap / 2
-        y_total = y_centre - gap / 2 - bar_h
+    ymax = max(max(demos), max(totals)) * 1.22
 
-        # Demographic bar (coloured)
-        ax.add_patch(FancyBboxPatch(
-            (0, y_demo), demo_share, bar_h,
-            boxstyle="round,pad=0,rounding_size=0.10",
-            facecolor=_COL_DEMO, edgecolor="none", zorder=3))
-        ax.text(demo_share + vmax * 0.015, y_demo + bar_h / 2,
-                f"{demo_share:.1f}%", va="center", ha="left",
-                fontsize=8.5, fontweight="bold", color=_COL_DEMO, zorder=4)
+    for i, (demo, total) in enumerate(zip(demos, totals)):
+        over        = demo >= total
+        main_color  = _COL_OVER if over else _COL_UNDER
 
-        # Total-population bar (grey reference)
-        ax.add_patch(FancyBboxPatch(
-            (0, y_total), total_share, bar_h,
-            boxstyle="round,pad=0,rounding_size=0.10",
-            facecolor=_COL_TOTAL, edgecolor="none", zorder=3))
-        ax.text(total_share + vmax * 0.015, y_total + bar_h / 2,
-                f"{total_share:.1f}%", va="center", ha="left",
-                fontsize=8.5, color=MUTED, zorder=4)
+        # Main (demographic) bar
+        ax.bar(x_main[i], demo, width=w_main, color=main_color,
+               align="edge", zorder=3, linewidth=0)
 
-        # Region label to the left, centred on the group
-        ax.text(-vmax * 0.02, y_centre + (bar_h - gap) / 2,
-                name, ha="right", va="center",
-                fontsize=9.5, fontweight="bold", color=INK, zorder=4)
+        # Thin reference bar
+        ax.bar(x_ref[i], total, width=w_ref, color=_COL_REF,
+               align="edge", zorder=3, linewidth=0)
 
-    ax.set_xlim(-vmax * 0.58, vmax * 1.22)
-    ax.set_ylim(-stride * 0.6, (n - 1) * stride + stride * 0.6)
-    ax.axis("off")
+        # Value label above main bar
+        ax.text(x_main[i] + w_main / 2, demo + ymax * 0.02,
+                f"{demo:.1f}%", ha="center", va="bottom",
+                fontsize=8, fontweight="bold", color=main_color, zorder=4)
 
-    # Legend
+        # Value label above reference bar
+        reference_label_y = total + ymax * 0.02
+        if abs(demo - total) < ymax * 0.06:
+            reference_label_y = max(demo, total) + ymax * 0.08
+        ax.text(x_ref[i] + w_ref / 2, reference_label_y,
+                f"{total:.1f}%", ha="center", va="bottom",
+                fontsize=7, color=MUTED, zorder=4)
+
+    # X-axis tick labels — wrapped, sitting comfortably above the source line
+    def wrap(s, width=12):
+        words = s.split()
+        lines, cur = [], []
+        for w in words:
+            if sum(len(x) for x in cur) + len(cur) + len(w) > width and cur:
+                lines.append(" ".join(cur)); cur = [w]
+            else:
+                cur.append(w)
+        if cur: lines.append(" ".join(cur))
+        return "\n".join(lines)
+
+    ax.set_xticks(range(n))
+    ax.set_xticklabels([wrap(nm) for nm in names],
+                       fontsize=8.5, color=INK, linespacing=1.3)
+    ax.tick_params(axis="x", length=0, pad=8)
+
+    # Y-axis
+    ax.set_xlim(-0.55, n - 0.2)
+    ax.set_ylim(0, ymax)
+    ax.tick_params(axis="y", colors=MUTED, labelsize=8)
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v:.0f}%"))
+    ax.yaxis.grid(color="#E6E0D2", linewidth=0.6, linestyle="--", zorder=0)
+    ax.set_axisbelow(True)
+    for spine in ("top", "right", "bottom"):
+        ax.spines[spine].set_visible(False)
+    ax.spines["left"].set_color("#D8D2C4")
+
+    # Legend — inside upper right, out of the way
     from matplotlib.patches import Patch
     handles = [
-        Patch(facecolor=_COL_DEMO,  label="Share of demographic"),
-        Patch(facecolor=_COL_TOTAL, label="Share of world population"),
+        Patch(facecolor=_COL_OVER,  label="Demographic share (over-represented)"),
+        Patch(facecolor=_COL_UNDER, label="Demographic share (under-represented)"),
+        Patch(facecolor=_COL_REF,   label="Share of world population (reference)"),
     ]
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.03),
-              ncol=2, frameon=False, fontsize=9, labelcolor=INK, handlelength=1.2)
+    ax.legend(handles=handles, loc="upper right", frameon=False,
+              fontsize=8, labelcolor=INK, handlelength=1.1,
+              handletextpad=0.5, borderpad=0)
 
     add_titles(ax, title, subtitle)
     add_footer(fig, ax_left, fig_h, source_h,
-               "Source: UN World Population Prospects 2024, medium variant.")
+               "Source: UN World Population Prospects 2024, medium variant.", position=0.20)
     save(fig, filename)
 
 
@@ -570,13 +604,13 @@ def chart_bubble(rows):
 
 MAP_METRICS = [
     ("Under40_pct",   "14_world_map_under40_pct.png",
-     "Share of Population Under 40, by Country",   f"{YEAR} estimates, %"),
+     "Share of Population Under 40, by Country",   f"{YEAR} estimates, %", False),
     ("Under20_pct",   "15_world_map_under20_pct.png",
-     "Share of Population Under 20, by Country",   f"{YEAR} estimates, %"),
+     "Share of Population Under 20, by Country",   f"{YEAR} estimates, %", False),
     ("Age0to4_pct",   "16_world_map_age0to4_pct.png",
-     "Share of Population Ages 0-4, by Country",   f"{YEAR} estimates, %"),
+     "Share of Population Ages 0-4, by Country",   f"{YEAR} estimates, %", False),
     ("Over65_pct",    "17_world_map_over65_pct.png",
-     "Share of Population 65+, by Country",        f"{YEAR} estimates, %"),
+     "Share of Population 65+, by Country",        f"{YEAR} estimates, %", True),
 ]
 
 
@@ -617,13 +651,18 @@ def chart_world_maps(country_rows):
     by_iso3 = {r["ISO3"]: r for r in country_rows}
 
     # Attach all age-share columns to the geodataframe up front
-    for col, _, _, _ in MAP_METRICS:
+    for col, *_ in MAP_METRICS:
         world[col] = world[iso_col].map(
             lambda code, c=col: by_iso3[code][c] if code in by_iso3 else None)
 
+    CMAP_REV = mcolors.LinearSegmentedColormap.from_list(
+        "proj_seq_r", [ACCENT_TEAL, "#8FD6C8", "#FBF6EF", "#E6A6BE", ACCENT_WINE]
+    )
+
     SOURCE = "Source: UN World Population Prospects 2024, medium variant."
 
-    def draw_map(column, filename, title, subtitle):
+    def draw_map(column, filename, title, subtitle, reverse_cmap=False):
+        cmap = CMAP_REV if reverse_cmap else CMAP
         fig_w, fig_h = 13.0, 7.2
         fig = plt.figure(figsize=(fig_w, fig_h))
         fig.patch.set_facecolor(PAGE_BG)
@@ -631,14 +670,14 @@ def chart_world_maps(country_rows):
         ax = fig.add_axes((0.03, 0.10, 0.94, 0.78))
         ax.set_facecolor(CARD_BG)
 
-        world.plot(column=column, cmap=CMAP, linewidth=0.3, edgecolor="#FFFFFF",
+        world.plot(column=column, cmap=cmap, linewidth=0.3, edgecolor="#FFFFFF",
                    ax=ax, missing_kwds={"color": "#DDD6C8", "label": "No data"})
         ax.set_axis_off()
         ax.set_xlim(-180, 180)
         ax.set_ylim(-60, 85)
 
         sm = plt.cm.ScalarMappable(
-            cmap=CMAP,
+            cmap=cmap,
             norm=mcolors.Normalize(vmin=world[column].min(), vmax=world[column].max()))
         sm.set_array([])
         cbar = fig.colorbar(sm, ax=ax, orientation="horizontal",
@@ -655,8 +694,8 @@ def chart_world_maps(country_rows):
         plt.close(fig)
         print("Saved:", out_path)
 
-    for column, filename, title, subtitle in MAP_METRICS:
-        draw_map(column, filename, title, subtitle)
+    for column, filename, title, subtitle, reverse in MAP_METRICS:
+        draw_map(column, filename, title, subtitle, reverse_cmap=reverse)
 
 
 # ===========================================================================
